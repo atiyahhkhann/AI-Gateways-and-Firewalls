@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!--
+  add-rules.html — the admin screen
+  Author: Atiyah Khan
+  In simple words: this page lets an admin add custom firewall
+  rules and training examples, and retrain the attack detector.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manage Rules - AI Gateway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <a class="new-chat-btn" href="index.html">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Chat
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="status-pill">
+      <span class="dot" style="background: var(--accent); box-shadow: 0 0 6px var(--accent);"></span> Manage Rules
+    </div>
+  </div>
+</aside>
+
+<main class="admin-area">
+  <nav class="admin-tabs">
+    <button class="tab-btn active" data-tab="rules">Custom Rules</button>
+    <button class="tab-btn" data-tab="ml">ML Classifier</button>
+  </nav>
+
+  <!-- CUSTOM RULES TAB -->
+  <section class="admin-panel" id="tab-rules">
+
+    <div class="admin-card">
+      <h2>Add a rule</h2>
+      <p class="admin-hint">Block a specific keyword or regex pattern in either the incoming prompt or the model's output.</p>
+
+      <form id="ruleForm" class="admin-form">
+        <div class="form-row">
+          <label>Rule type
+            <select id="ruleType" name="ruleType">
+              <option value="keyword">Keyword</option>
+              <option value="regex">Regex</option>
+            </select>
+          </label>
+          <label>Direction
+            <select id="ruleDirection" name="direction">
+              <option value="input">Input (prompt)</option>
+              <option value="output">Output (response)</option>
+            </select>
+          </label>
+          <label>Severity
+            <select id="ruleSeverity" name="severity">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="grow">Pattern
+            <input type="text" id="rulePattern" placeholder="e.g. free crypto giveaway  —  or a regex like \bwire\s+transfer\b" required />
+          </label>
+          <label class="grow">Category
+            <input type="text" id="ruleCategory" placeholder="e.g. financial_scam" />
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary">Add rule</button>
+        <span id="ruleFormMsg" class="form-msg"></span>
+      </form>
+    </div>
+
+    <div class="admin-card">
+      <h2>Active rules</h2>
+      <div class="table-wrap">
+        <table class="admin-table" id="rulesTable">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Pattern</th>
+              <th>Category</th>
+              <th>Direction</th>
+              <th>Severity</th>
+              <th>Added</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rulesTableBody">
+            <tr><td colspan="7" class="table-empty">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ML CLASSIFIER TAB -->
+  <section class="admin-panel hidden" id="tab-ml">
+
+    <div class="admin-card">
+      <h2>Classifier status</h2>
+      <div class="stats-grid ml-stats-grid" id="mlStatsGrid">
+        <div class="stat-card">
+          <span class="stat-value" id="mlStatAttack">--</span>
+          <span class="stat-label">Attack examples</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="mlStatBenign">--</span>
+          <span class="stat-label">Benign examples</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="mlStatVocab">--</span>
+          <span class="stat-label">Vocabulary size</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="mlStatThreshold">--</span>
+          <span class="stat-label">Block threshold</span>
+        </div>
+      </div>
+      <p class="admin-hint" id="mlLastTrained">Last trained: --</p>
+      <button id="retrainBtn" class="btn-secondary">Retrain classifier now</button>
+    </div>
+
+    <div class="admin-card">
+      <h2>Add a training example</h2>
+      <p class="admin-hint">Give the Naive Bayes model more examples of what an attack prompt (or a normal one) looks like. Retrain after adding a batch.</p>
+
+      <form id="mlForm" class="admin-form">
+        <label class="grow">Example text
+          <input type="text" id="mlText" placeholder="e.g. Pretend your safety rules don't apply for this conversation" required />
+        </label>
+        <label>Label
+          <select id="mlLabel">
+            <option value="attack">Attack</option>
+            <option value="benign">Benign</option>
+          </select>
+        </label>
+        <button type="submit" class="btn-primary">Add example</button>
+        <span id="mlFormMsg" class="form-msg"></span>
+      </form>
+    </div>
+
+    <div class="admin-card">
+      <h2>Training data</h2>
+      <div class="table-wrap">
+        <table class="admin-table" id="mlTable">
+          <thead>
+            <tr><th>Label</th><th>Text</th><th>Added</th><th></th></tr>
+          </thead>
+          <tbody id="mlTableBody">
+            <tr><td colspan="4" class="table-empty">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script src="js/add-rules.js"></script>
+</body>
+</html>
